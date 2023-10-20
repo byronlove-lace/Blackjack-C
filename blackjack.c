@@ -27,10 +27,16 @@ int main ( void )
         const char *number_card[NUMS] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
         const char *face_card[FACES] = {"Jack", "Queen", "King"};
         const char *suit[SUITS] = {"Spades", "Diamonds", "Clubs", "Hearts"};
-        char *deck[DECK_TOTAL];
+        char *deck[DECK_TOTAL] = {0};
 
         char *hands[PLAYERS][MAX_HAND];
-        
+
+        assemble(suit, number_card, face_card, deck);
+
+        printf("%s", deck[1]);
+
+        for (size_t i = 0; i < DECK_TOTAL; ++i)
+                printf("%s", deck[1]);
                 
 }
 
@@ -49,6 +55,28 @@ void assemble(const char const *suits[], const char const *nums[], const char co
 
                 for (size_t f = 0; f < FACES; ++f)
                 {
+                        deck[pos] = mk_crd(faces[f], suits[s], current_card);
+                        ++pos;
+                }
+        }
+
+        for (size_t s = 2; s < SUITS; ++s)
+        {
+
+                // int instead of size_t here:
+                // > size_t is unsigned long long 
+                // > when it reaches -1 (termination condition) it will be out of bounds
+                // > gives garbage vals that cause infinite loop
+
+                for (int f = (FACES - 1); f >= 0; --f)
+                {
+                        deck[pos] = mk_crd(faces[f], suits[s], current_card);
+                        ++pos;
+                }
+
+                for (int n = (NUMS - 1); n >= 0; --n)
+                {
+                        deck[pos] = mk_crd(nums[n], suits[s], current_card);
                         ++pos;
                 }
         }
