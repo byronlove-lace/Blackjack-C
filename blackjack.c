@@ -12,7 +12,7 @@
 #define PLAYERS 2
 
 void dec_ins_sort(int *arr, size_t);
-void assemble(const char *suits, const char *nums, const char *faces, char *deck);
+void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char *deck[]);
 char *mk_crd(const char *val, const char *suit, char *crd);
 void shuffle(int, size_t);
 void deal(int, size_t);
@@ -31,13 +31,13 @@ int main ( void )
 
         char *hands[PLAYERS][MAX_HAND];
         
-        int name_len = (10 + 3 + 4 + 2 + 2);
                 
 }
 
-void assemble(const char *suits, const char *nums, const char *faces, char *deck)
+void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char *deck[])
 {
         char current_card[MAX_CARD_NAME];  
+
         unsigned int pos = 0;
         for (size_t s = 0; s < SUITS/2; ++s)
         {
@@ -45,17 +45,14 @@ void assemble(const char *suits, const char *nums, const char *faces, char *deck
                 {
                         deck[pos] = mk_crd(nums[n], suits[s], current_card);
                         ++pos;
-                        
                 }
 
                 for (size_t f = 0; f < FACES; ++f)
                 {
-                        //
                         ++pos;
                 }
         }
 }
-
 
 char *mk_crd(const char *val, const char *suit, char *crd)
 {
@@ -65,7 +62,6 @@ char *mk_crd(const char *val, const char *suit, char *crd)
 
         while (val[i] != '\0')
         {
-                
                 crd[i] = val[i];
                 i++;
         }
