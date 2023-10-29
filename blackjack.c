@@ -5,15 +5,14 @@
 #define MAX_HAND 12
 #define MAX_CARD_NAME 22
 #define DECK_TOTAL 52
-#define SUITS 4
-#define NUMS 10
-#define FACES 3
+#define SUIT_COUNT 4
+#define NUM_COUNT 10
+#define FACE_COUNT 3
 
 #define PLAYERS 2
 
-void dec_ins_sort(int *arr, size_t);
-void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char *deck[]);
-char *mk_crd(const char *val, const char *suit, char *crd);
+void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
+void mk_crd(const char *val, const char *suit, char *crd);
 void shuffle(int, size_t);
 void deal(int, size_t);
 
@@ -24,43 +23,44 @@ int main ( void )
         int hand[MAX_HAND];
         int hand_value;
 
-        const char *number_card[NUMS] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
-        const char *face_card[FACES] = {"Jack", "Queen", "King"};
-        const char *suit[SUITS] = {"Spades", "Diamonds", "Clubs", "Hearts"};
-        char *deck[DECK_TOTAL] = {0};
+        const char *number_card[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
+        const char *face_card[FACE_COUNT] = {"Jack", "Queen", "King"};
+        const char *suit[SUIT_COUNT] = {"Spades", "Diamonds", "Clubs", "Hearts"};
+        char deck[DECK_TOTAL][MAX_CARD_NAME] = {0};
+        // can't use *dec[DECK_TOTAL] as this will create an array of objects of len(pointer)
 
         char *hands[PLAYERS][MAX_HAND];
 
         assemble(suit, number_card, face_card, deck);
 
-        printf("%s", deck[1]);
-
         for (size_t i = 0; i < DECK_TOTAL; ++i)
-                printf("%s", deck[1]);
-                
+                printf("%s\n", deck[i]);
 }
 
-void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char *deck[])
+void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char deck[DECK_TOTAL][MAX_CARD_NAME])
 {
         char current_card[MAX_CARD_NAME];  
 
         unsigned int pos = 0;
-        for (size_t s = 0; s < SUITS/2; ++s)
+
+        for (size_t s = 0; s < SUIT_COUNT/2; ++s)
         {
-                for (size_t n = 0; n < NUMS; ++n)
+                for (size_t n = 0; n < NUM_COUNT; ++n)
                 {
-                        deck[pos] = mk_crd(nums[n], suits[s], current_card);
+                        mk_crd(nums[n], suits[s], current_card);
+                        strcpy(deck[pos], current_card);
                         ++pos;
                 }
 
-                for (size_t f = 0; f < FACES; ++f)
+                for (size_t f = 0; f < FACE_COUNT; ++f)
                 {
-                        deck[pos] = mk_crd(faces[f], suits[s], current_card);
+                        mk_crd(faces[f], suits[s], current_card);
+                        strcpy(deck[pos], current_card);
                         ++pos;
                 }
         }
 
-        for (size_t s = 2; s < SUITS; ++s)
+        for (size_t s = 2; s < SUIT_COUNT; ++s)
         {
 
                 // int instead of size_t here:
@@ -68,21 +68,23 @@ void assemble(const char const *suits[], const char const *nums[], const char co
                 // > when it reaches -1 (termination condition) it will be out of bounds
                 // > gives garbage vals that cause infinite loop
 
-                for (int f = (FACES - 1); f >= 0; --f)
+                for (int f = (FACE_COUNT - 1); f >= 0; --f)
                 {
-                        deck[pos] = mk_crd(faces[f], suits[s], current_card);
+                        mk_crd(faces[f], suits[s], current_card);
+                        strcpy(deck[pos], current_card);
                         ++pos;
                 }
 
-                for (int n = (NUMS - 1); n >= 0; --n)
+                for (int n = (NUM_COUNT - 1); n >= 0; --n)
                 {
-                        deck[pos] = mk_crd(nums[n], suits[s], current_card);
+                        mk_crd(nums[n], suits[s], current_card);
+                        strcpy(deck[pos], current_card);
                         ++pos;
                 }
         }
 }
 
-char *mk_crd(const char *val, const char *suit, char *crd)
+void mk_crd(const char *val, const char *suit, char *crd)
 {
         const char of[5] = " of ";
         size_t i, j, k;
@@ -109,5 +111,4 @@ char *mk_crd(const char *val, const char *suit, char *crd)
         }
 
         crd[i] = '\0';
-        return crd;
 }
