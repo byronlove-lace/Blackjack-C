@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <time.h>
 
 #define MAX_HAND 12
 #define MAX_CARD_NAME 22
@@ -12,12 +13,12 @@
 #define PLAYERS 2
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
-void mk_crd(const char *val, const char *suit, char *crd);
-void shuffle(int, size_t);
+void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME]);
 void deal(int, size_t);
 
 int main ( void )
 {
+        srand(time(NULL));
 
         int card_count;
         int hand[MAX_HAND];
@@ -32,13 +33,15 @@ int main ( void )
         char *hands[PLAYERS][MAX_HAND];
 
         assemble(suit, number_card, face_card, deck);
+        shuffle(deck);
 
         for (size_t i = 0; i < DECK_TOTAL; ++i)
                 printf("%s\n", deck[i]);
 }
 
-void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char deck[DECK_TOTAL][MAX_CARD_NAME])
+void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
 {
+        void mk_crd(const char *val, const char *suit, char *crd);
         char current_card[MAX_CARD_NAME];  
 
         unsigned int pos = 0;
@@ -48,14 +51,17 @@ void assemble(const char const *suits[], const char const *nums[], const char co
                 for (size_t n = 0; n < NUM_COUNT; ++n)
                 {
                         mk_crd(nums[n], suits[s], current_card);
-                        strcpy(deck[pos], current_card);
+                        strcpy(pack[pos], current_card);
+                        // can't use pack[pos] = current_card here
+                        // this would set the pointer pack[pos] to addy of current_card
+                        // thre result would be that every object in pack would be the last value of current card
                         ++pos;
                 }
 
                 for (size_t f = 0; f < FACE_COUNT; ++f)
                 {
                         mk_crd(faces[f], suits[s], current_card);
-                        strcpy(deck[pos], current_card);
+                        strcpy(pack[pos], current_card);
                         ++pos;
                 }
         }
@@ -71,14 +77,14 @@ void assemble(const char const *suits[], const char const *nums[], const char co
                 for (int f = (FACE_COUNT - 1); f >= 0; --f)
                 {
                         mk_crd(faces[f], suits[s], current_card);
-                        strcpy(deck[pos], current_card);
+                        strcpy(pack[pos], current_card);
                         ++pos;
                 }
 
                 for (int n = (NUM_COUNT - 1); n >= 0; --n)
                 {
                         mk_crd(nums[n], suits[s], current_card);
-                        strcpy(deck[pos], current_card);
+                        strcpy(pack[pos], current_card);
                         ++pos;
                 }
         }
@@ -112,3 +118,20 @@ void mk_crd(const char *val, const char *suit, char *crd)
 
         crd[i] = '\0';
 }
+
+void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME])
+{
+        int r; 
+        char rand_card[MAX_CARD_NAME];  
+        char hold_card[MAX_CARD_NAME];  
+
+       for (size_t i = 0; i < DECK_TOTAL; ++i) 
+               {
+                       r = rand() % DECK_TOTAL;
+                       strcpy(rand_card, pack[r]);
+                       strcpy(hold_card, pack[i]);
+                       strcpy(pack[i], rand_card);
+                       strcpy(pack[r], hold_card);
+               }
+}
+
