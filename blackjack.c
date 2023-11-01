@@ -9,34 +9,40 @@
 #define SUIT_COUNT 4
 #define NUM_COUNT 10
 #define FACE_COUNT 3
-
-#define PLAYERS 2
+#define MAX_PLAYERS 7
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
 void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME]);
-void deal(int, size_t);
+void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *hand_count);
+void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count);
 
 int main ( void )
 {
         srand(time(NULL));
 
-        int card_count;
-        int hand[MAX_HAND];
-        int hand_value;
+        unsigned int top_crd = 0;
+        char player_hand[MAX_HAND][MAX_CARD_NAME] = {0};
+        char dealer_hand[MAX_HAND][MAX_CARD_NAME] = {0};
 
-        const char *number_card[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
-        const char *face_card[FACE_COUNT] = {"Jack", "Queen", "King"};
+        unsigned int player_crd_count = 0;
+        unsigned int dealer_crd_count = 0;
+
+        const char *number_crd[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
+        const char *face_crd[FACE_COUNT] = {"Jack", "Queen", "King"};
         const char *suit[SUIT_COUNT] = {"Spades", "Diamonds", "Clubs", "Hearts"};
         char deck[DECK_TOTAL][MAX_CARD_NAME] = {0};
         // can't use *dec[DECK_TOTAL] as this will create an array of objects of len(pointer)
 
-        char *hands[PLAYERS][MAX_HAND];
-
-        assemble(suit, number_card, face_card, deck);
+        assemble(suit, number_crd, face_crd, deck);
         shuffle(deck);
 
-        for (size_t i = 0; i < DECK_TOTAL; ++i)
-                printf("%s\n", deck[i]);
+        deal_phase(deck, dealer_hand, player_hand, &top_crd, &dealer_crd_count, &player_crd_count);
+
+        for (size_t i = 0; i < player_crd_count; ++i)
+        {
+                printf("%s\n", player_hand[i]);
+        }
+
 }
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
@@ -133,5 +139,21 @@ void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME])
                        strcpy(pack[i], rand_card);
                        strcpy(pack[r], hold_card);
                }
+}
+
+void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count)
+{
+        deal_crd(pack, p_hand, nxt_crd, p_hand_count);
+        deal_crd(pack, d_hand, nxt_crd, d_hand_count);
+        deal_crd(pack, p_hand, nxt_crd, p_hand_count);
+        deal_crd(pack, d_hand, nxt_crd, d_hand_count);
+}
+
+void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *hand_count)
+{ 
+        strcpy(hand[*hand_count], pack[*nxt_crd]);
+
+        ++*nxt_crd;
+        ++*hand_count;
 }
 
