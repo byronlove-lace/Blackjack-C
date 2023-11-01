@@ -14,9 +14,12 @@
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
 void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME]);
 void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *hand_count);
+
 void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count);
 
-int main ( void )
+void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count, char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int d_hand_count, unsigned int opening);
+
+int main (void)
 {
         srand(time(NULL));
 
@@ -37,11 +40,10 @@ int main ( void )
         shuffle(deck);
 
         deal_phase(deck, dealer_hand, player_hand, &top_crd, &dealer_crd_count, &player_crd_count);
+        // dealer_hand[0] is face down
 
-        for (size_t i = 0; i < player_crd_count; ++i)
-        {
-                printf("%s\n", player_hand[i]);
-        }
+        printf("Dealer: %s, 1 Facedown Card\n", dealer_hand[1]);
+        read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 0);
 
 }
 
@@ -153,7 +155,42 @@ void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD
 { 
         strcpy(hand[*hand_count], pack[*nxt_crd]);
 
-        ++*nxt_crd;
-        ++*hand_count;
+        ++*nxt_crd; ++*hand_count;
 }
 
+void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count, char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int d_hand_count, unsigned int opening)
+{
+        if (opening > 1 || opening < 0)
+        {
+                puts("opening input is incorrect. Please change to 1 or 0");
+        }
+
+        if (opening == 0)
+        {
+                puts("Opening: \n");
+                puts("Player: ");
+                for (size_t i = 0; i < p_hand_count; ++i)
+                {
+                        printf("%s\n", p_hand[i]);
+                }
+                puts("");
+                printf("Dealer:\n%s\n1 Facedown Card\n", d_hand[1]);
+        }
+
+        if (opening == 1)
+        {
+                puts("Player: ");
+                for (size_t i = 0; i < p_hand_count; ++i)
+                {
+                        printf("%s\n", p_hand[i]);
+                }
+                puts("");
+
+                puts("Dealer: ");
+
+                for (size_t i = 0; i < d_hand_count; ++i)
+                {
+                        printf("%s\n", d_hand[i]);
+                }
+        }
+}
