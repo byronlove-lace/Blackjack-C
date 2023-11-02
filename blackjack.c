@@ -10,6 +10,7 @@
 #define NUM_COUNT 10
 #define FACE_COUNT 3
 #define MAX_PLAYERS 7
+#define VAL_LEN 6
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
 void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME]);
@@ -18,6 +19,8 @@ void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD
 void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count);
 
 void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count, char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int d_hand_count, unsigned int opening);
+
+unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count);
 
 int main (void)
 {
@@ -41,10 +44,9 @@ int main (void)
 
         deal_phase(deck, dealer_hand, player_hand, &top_crd, &dealer_crd_count, &player_crd_count);
         // dealer_hand[0] is face down
-
-        printf("Dealer: %s, 1 Facedown Card\n", dealer_hand[1]);
         read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 0);
-
+        unsigned int real_val = eval_hand(player_hand, player_crd_count);
+        printf("PLAYER HAND VALUE: %u\n", real_val);
 }
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
@@ -193,4 +195,94 @@ void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count,
                         printf("%s\n", d_hand[i]);
                 }
         }
+}
+
+unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count) 
+{
+        unsigned int letter = 0;
+        char val[VAL_LEN] = {0};
+        unsigned int hand_val = 0;
+
+                for (size_t i = 0; i < hand_count; ++i)
+                {
+                        while (hand[i][letter] != ' ')
+                        {
+                                val[letter] = hand[i][letter];
+                                ++letter;
+                        }
+                        
+                        letter = 0;
+
+                        if (strcmp(val, "Ace") == 0)
+                        {
+                                if (hand_val > 10)
+                                        hand_val += 1;
+                                else
+                                        hand_val += 11;
+                        }
+
+                        if (strcmp(val, "Two") == 0)
+                        {
+                                hand_val += 2;
+                        }
+
+                        if (strcmp(val, "Three") == 0)
+                        {
+                                hand_val += 3;
+                        }
+
+                        if (strcmp(val, "Four") == 0)
+                        {
+                                hand_val += 4;
+                        }
+
+                        if (strcmp(val, "Five") == 0)
+                        {
+                                hand_val += 5;
+                        }
+
+                        if (strcmp(val, "Six") == 0)
+                        {
+                                hand_val += 6;
+                        }
+
+                        if (strcmp(val, "Seven") == 0)
+                        {
+                                hand_val += 7;
+                        }
+
+                        if (strcmp(val, "Eight") == 0)
+                        {
+                                hand_val += 8;
+                        }
+
+                        if (strcmp(val, "Nine") == 0)
+                        {
+                                hand_val += 9;
+                        }
+
+                        if (strcmp(val, "Ten") == 0)
+                        {
+                                hand_val += 10;
+                        }
+
+                        if (strcmp(val, "Jack") == 0)
+                        {
+                                hand_val += 10;
+                        }
+
+                        if (strcmp(val, "Queen") == 0)
+                        {
+                                hand_val += 10;
+                        }
+
+                        if (strcmp(val, "King") == 0)
+                        {
+                                hand_val += 10;
+                        }
+
+                        memset(val, '\0', VAL_LEN * sizeof(char));
+                }
+
+        return hand_val;
 }
