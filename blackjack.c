@@ -22,6 +22,8 @@ void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count,
 
 unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count);
 
+void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, unsigned int* stand_state);
+
 int main (void)
 {
         srand(time(NULL));
@@ -33,20 +35,27 @@ int main (void)
         unsigned int player_crd_count = 0;
         unsigned int dealer_crd_count = 0;
 
+        unsigned int player_hand_val = 0;
+        unsigned int dealer_hand_val = 0;
+
         const char *number_crd[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
         const char *face_crd[FACE_COUNT] = {"Jack", "Queen", "King"};
         const char *suit[SUIT_COUNT] = {"Spades", "Diamonds", "Clubs", "Hearts"};
         char deck[DECK_TOTAL][MAX_CARD_NAME] = {0};
-        // can't use *dec[DECK_TOTAL] as this will create an array of objects of len(pointer)
+
+        unsigned int bust = 1;
+        unsigned int standing = 1;
 
         assemble(suit, number_crd, face_crd, deck);
         shuffle(deck);
 
         deal_phase(deck, dealer_hand, player_hand, &top_crd, &dealer_crd_count, &player_crd_count);
-        // dealer_hand[0] is face down
         read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 0);
-        unsigned int real_val = eval_hand(player_hand, player_crd_count);
-        printf("PLAYER HAND VALUE: %u\n", real_val);
+        player_hand_val = eval_hand(player_hand, player_crd_count);
+        dealer_hand_val = eval_hand(player_hand, player_crd_count);
+        hit_or_stand(deck, player_hand, &top_crd, &player_crd_count, &standing);
+        read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
+
 }
 
 void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
@@ -153,7 +162,7 @@ void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_
         deal_crd(pack, d_hand, nxt_crd, d_hand_count);
 }
 
-void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *hand_count)
+void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* hand_count)
 { 
         strcpy(hand[*hand_count], pack[*nxt_crd]);
 
@@ -285,4 +294,25 @@ unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_cou
                 }
 
         return hand_val;
+}
+
+void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, unsigned int* stand_state)
+{
+
+        char player_choice;
+
+        puts("(H)it or (S)tand");
+        scanf("%c", &player_choice);
+
+        if (player_choice == 'h' || player_choice == 'H')
+        {
+                puts("Hit!");
+                deal_crd(pack, p_hand, nxt_crd, p_hand_count);
+        }
+        if (player_choice == 's' || player_choice == 'S')
+        {
+                puts("Stand!");
+        }
+        else
+                puts("Please choose H or S");
 }
