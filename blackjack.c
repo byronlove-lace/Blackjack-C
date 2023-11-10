@@ -29,7 +29,7 @@ void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, bool* nat);
 
 void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, bool* stand_state);
 
-unsigned int ace_check(unsigned int hand_val, unsigned int* ace_count);
+unsigned int ace_check(unsigned int* hand_val, unsigned int* ace_count);
 
 int main (void)
 {
@@ -81,15 +81,26 @@ int main (void)
                         break;
                 }
 
+                if (player_standing == true && dealer_standing == true)
+                {
+                        if (player_hand_val == dealer_hand_val)
+                        {
+                                puts("Draw!");
+                                break;
+                        }
+                }
+
                 if (player_standing == false)
                 {
                         hit_or_stand(deck, player_hand, &top_crd, &player_crd_count, &player_standing);
                 }
 
                 read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
+                printf("PLAYER VAL: %u\n", player_hand_val);
+                printf("DEALER VAL: %u\n", dealer_hand_val);
 
                 player_hand_val = eval_hand(player_hand, player_crd_count, player_ace_count);
-                player_hand_val = ace_check(player_hand_val, &player_ace_count);
+                player_hand_val = ace_check(&player_hand_val, &player_ace_count);
 
                 if (player_hand_val > 21)
                 {
@@ -105,7 +116,7 @@ int main (void)
                 read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
 
                 dealer_hand_val = eval_hand(dealer_hand, dealer_crd_count, dealer_ace_count);
-                dealer_hand_val = ace_check(dealer_hand_val, &dealer_ace_count);
+                dealer_hand_val = ace_check(&dealer_hand_val, &dealer_ace_count);
 
                 if (dealer_hand_val > 21)
                 {
@@ -379,19 +390,19 @@ void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, bool* nat)
         if (p_hand_val == 21 && d_hand_val == 21)
         {
                 puts("Double Natural! Draw!");
-                *nat = 0;
+                *nat = true;
         }
 
         else if (p_hand_val == 21)
         {
                 puts("Natural! Player Wins!");
-                *nat = 0;
+                *nat = true;
         }
 
         else if (d_hand_val == 21)
         {
                 puts("Natural! Dealer Wins!");
-                *nat = 0;
+                *nat = true;
         }
 }
 
@@ -409,16 +420,21 @@ void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_C
         }
 }
 
-unsigned int ace_check(unsigned int hand_val, unsigned int* ace_count)
+unsigned int ace_check(unsigned int* hand_val, unsigned int* ace_count)
 {
-        while (hand_val > 21)
+        while (*hand_val > 21)
         {
-                if (ace_count > 0)
+                if (*ace_count > 0)
                 {
-                        --ace_count;
-                        hand_val -= 10;
+                        --*ace_count;
+                        *hand_val -= 10;
+                }
+
+                else
+                {
+                        break;
                 }
         }
 
-        return hand_val;
+        return *hand_val;
 }
