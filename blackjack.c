@@ -21,7 +21,7 @@ void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_
 
 void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count, char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int d_hand_count, unsigned int opening);
 
-unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count, unsigned int ace_count);
+unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count, unsigned int* ace_count);
 
 void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, bool* stand_state);
 
@@ -29,7 +29,7 @@ void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, bool* nat);
 
 void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, bool* stand_state);
 
-unsigned int ace_check(unsigned int* hand_val, unsigned int* ace_count);
+void ace_check(unsigned int* hand_val, unsigned int* ace_count);
 
 int main (void)
 {
@@ -62,8 +62,8 @@ int main (void)
 
         deal_phase(deck, dealer_hand, player_hand, &top_crd, &dealer_crd_count, &player_crd_count);
         read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 0);
-        player_hand_val = eval_hand(player_hand, player_crd_count, player_ace_count);
-        dealer_hand_val = eval_hand(dealer_hand, dealer_crd_count, dealer_ace_count);
+        player_hand_val = eval_hand(player_hand, player_crd_count, &player_ace_count);
+        dealer_hand_val = eval_hand(dealer_hand, dealer_crd_count, &dealer_ace_count);
         natural_check(player_hand_val, dealer_hand_val, &natural);
         // nat_check could have prog exit 
 
@@ -96,11 +96,9 @@ int main (void)
                 }
 
                 read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
-                printf("PLAYER VAL: %u\n", player_hand_val);
-                printf("DEALER VAL: %u\n", dealer_hand_val);
 
-                player_hand_val = eval_hand(player_hand, player_crd_count, player_ace_count);
-                player_hand_val = ace_check(&player_hand_val, &player_ace_count);
+                player_hand_val = eval_hand(player_hand, player_crd_count, &player_ace_count);
+                ace_check(&player_hand_val, &player_ace_count);
 
                 if (player_hand_val > 21)
                 {
@@ -115,8 +113,8 @@ int main (void)
 
                 read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
 
-                dealer_hand_val = eval_hand(dealer_hand, dealer_crd_count, dealer_ace_count);
-                dealer_hand_val = ace_check(&dealer_hand_val, &dealer_ace_count);
+                dealer_hand_val = eval_hand(dealer_hand, dealer_crd_count, &dealer_ace_count);
+                ace_check(&dealer_hand_val, &dealer_ace_count);
 
                 if (dealer_hand_val > 21)
                 {
@@ -273,7 +271,7 @@ void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count,
         puts("");
 }
 
-unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count, unsigned int ace_count) 
+unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count, unsigned int* ace_count) 
 {
         unsigned int letter = 0;
         char val[VAL_LEN] = {0};
@@ -351,7 +349,7 @@ unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_cou
 
                         if (strcmp(val, "Ace") == 0)
                         {
-                                ++ace_count;
+                                ++*ace_count;
                                 hand_val += 11;
                                 // ace is dynamic
                                 // if you have Ace and five, then hit and get queen, ace becomes 1
@@ -420,7 +418,7 @@ void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_C
         }
 }
 
-unsigned int ace_check(unsigned int* hand_val, unsigned int* ace_count)
+void ace_check(unsigned int* hand_val, unsigned int* ace_count)
 {
         while (*hand_val > 21)
         {
@@ -435,6 +433,4 @@ unsigned int ace_check(unsigned int* hand_val, unsigned int* ace_count)
                         break;
                 }
         }
-
-        return *hand_val;
 }
