@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <time.h>
+#include <stdbool.h>
 
 #define MAX_HAND 12
 #define MAX_CARD_NAME 22
@@ -12,21 +13,21 @@
 #define MAX_PLAYERS 7
 #define VAL_LEN 6
 
-void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[][MAX_CARD_NAME]);
+void assemble(const char const* suits[], const char const* nums[], const char const* faces[], char pack[][MAX_CARD_NAME]);
 void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME]);
-void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *hand_count);
+void deal_crd(char pack[DECK_TOTAL][MAX_CARD_NAME], char hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* hand_count);
 
-void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count);
+void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* p_hand_count);
 
 void read_hands(char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int p_hand_count, char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int d_hand_count, unsigned int opening);
 
 unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_count);
 
-void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, unsigned int* stand_state);
+void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, bool* stand_state);
 
-void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, unsigned int* in_play);
+void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, bool* nat);
 
-void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, unsigned int* stand_state);
+void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, bool* stand_state);
 
 int main (void)
 {
@@ -42,15 +43,14 @@ int main (void)
         unsigned int player_hand_val = 0;
         unsigned int dealer_hand_val = 0;
 
-        const char *number_crd[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
-        const char *face_crd[FACE_COUNT] = {"Jack", "Queen", "King"};
-        const char *suit[SUIT_COUNT] = {"Spades", "Diamonds", "Clubs", "Hearts"};
+        const char* number_crd[NUM_COUNT] = {"Ace", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten"};
+        const char* face_crd[FACE_COUNT] = {"Jack", "Queen", "King"};
+        const char* suit[SUIT_COUNT] = {"Spades", "Diamonds", "Clubs", "Hearts"};
         char deck[DECK_TOTAL][MAX_CARD_NAME] = {0};
 
-        unsigned int bust = 1;
-        unsigned int player_standing = 1;
-        unsigned int dealer_standing = 1;
-        unsigned int natural = 1;
+        bool player_standing = false;
+        bool dealer_standing = false;
+        bool natural = false;
 
         assemble(suit, number_crd, face_crd, deck);
         shuffle(deck);
@@ -61,22 +61,23 @@ int main (void)
         dealer_hand_val = eval_hand(player_hand, player_crd_count);
         natural_check(player_hand_val, dealer_hand_val, &natural);
 
-        while (natural == 1)
+        while (natural == false)
         {
-                if (player_standing == 0 && player_hand_val < dealer_hand_val)
+                if (player_standing == true && player_hand_val < dealer_hand_val)
                 {
                         puts("Dealer Wins!");
                 }
 
-                if (dealer_standing == 0 && dealer_hand_val < player_hand_val)
+                if (dealer_standing == true && dealer_hand_val < player_hand_val)
                 {
                         puts("Player Wins!");
                 }
 
-                if (player_standing == 1)
+                if (player_standing == false)
                 {
                         hit_or_stand(deck, player_hand, &top_crd, &player_crd_count, &player_standing);
                 }
+
                 read_hands(player_hand, player_crd_count, dealer_hand, dealer_crd_count, 1);
                 player_hand_val = eval_hand(player_hand, player_crd_count);
                 if (player_hand_val > 21)
@@ -84,7 +85,7 @@ int main (void)
                         puts("Bust! Player Loses!");
                         break;
                 }
-                if (dealer_standing == 1)
+                if (dealer_standing == false)
                 {
                         dealer_ai(deck, dealer_hand, &top_crd, &dealer_crd_count, &dealer_hand_val, &dealer_standing); 
                 }
@@ -101,9 +102,9 @@ int main (void)
 
 }
 
-void assemble(const char const *suits[], const char const *nums[], const char const *faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
+void assemble(const char const* suits[], const char const* nums[], const char const* faces[], char pack[DECK_TOTAL][MAX_CARD_NAME])
 {
-        void mk_crd(const char *val, const char *suit, char *crd);
+        void mk_crd(const char* val, const char* suit, char* crd);
         char current_card[MAX_CARD_NAME];  
 
         unsigned int pos = 0;
@@ -151,7 +152,7 @@ void assemble(const char const *suits[], const char const *nums[], const char co
         }
 }
 
-void mk_crd(const char *val, const char *suit, char *crd)
+void mk_crd(const char* val, const char* suit, char* crd)
 {
         const char of[5] = " of ";
         size_t i, j, k;
@@ -196,7 +197,7 @@ void shuffle(char pack[DECK_TOTAL][MAX_CARD_NAME])
                }
 }
 
-void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int *nxt_crd, unsigned int *d_hand_count, unsigned int *p_hand_count)
+void deal_phase(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* p_hand_count)
 {
         deal_crd(pack, p_hand, nxt_crd, p_hand_count);
         deal_crd(pack, d_hand, nxt_crd, d_hand_count);
@@ -338,7 +339,7 @@ unsigned int eval_hand(char hand[MAX_HAND][MAX_CARD_NAME], unsigned int hand_cou
         return hand_val;
 }
 
-void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, unsigned int* stand_state)
+void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* p_hand_count, bool* stand_state)
 {
         char player_choice;
 
@@ -353,13 +354,13 @@ void hit_or_stand(char pack[DECK_TOTAL][MAX_CARD_NAME], char p_hand[MAX_HAND][MA
         else if (player_choice == 's' || player_choice == 'S')
         {
                 puts("Player Stands!");
-                *stand_state = 0;
+                *stand_state = true;
         }
         else
                 puts("Please choose H or S");
 }
 
-void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, unsigned int* nat)
+void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, bool* nat)
 {
         if (p_hand_val == 21 && d_hand_val == 21)
         {
@@ -380,7 +381,7 @@ void natural_check(unsigned int p_hand_val, unsigned int d_hand_val, unsigned in
         }
 }
 
-void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, unsigned int* stand_state)
+void dealer_ai(char pack[DECK_TOTAL][MAX_CARD_NAME], char d_hand[MAX_HAND][MAX_CARD_NAME], unsigned int* nxt_crd, unsigned int* d_hand_count, unsigned int* d_hand_val, bool *stand_state)
 {
         if (*d_hand_val < 17) 
         {
