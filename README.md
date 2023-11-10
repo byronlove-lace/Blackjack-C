@@ -13,9 +13,9 @@ Classic Blackjack made in C
 7. Game loops until bust or natural win
 
 ## Progress
-Need to debug dealer AI
-Need to debug natural check
-Need to add split check
+* Need to debug dealer AI
+* Need to debug natural check
+* Need to add split check
 
 ## Background
 I did this project to learn about pointers in C
